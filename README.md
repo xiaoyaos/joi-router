@@ -1,6 +1,6 @@
 # joi-router
 
-Easy, rich and fully validated [koa][] routing.
+Easy, rich and fully validated [logoran][] routing.
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
@@ -8,22 +8,22 @@ Easy, rich and fully validated [koa][] routing.
 [![David deps][david-image]][david-url]
 [![npm download][download-image]][download-url]
 
-[npm-image]: https://img.shields.io/npm/v/koa-joi-router.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/koa-joi-router
-[travis-image]: https://img.shields.io/travis/koajs/joi-router.svg?style=flat-square
-[travis-url]: https://travis-ci.org/koajs/joi-router
-[codecov-image]: https://codecov.io/github/koajs/joi-router/coverage.svg?branch=master
-[codecov-url]: https://codecov.io/github/koajs/joi-router?branch=master
-[david-image]: https://img.shields.io/david/koajs/joi-router.svg?style=flat-square
-[david-url]: https://david-dm.org/koajs/joi-router
-[download-image]: https://img.shields.io/npm/dm/koa-joi-router.svg?style=flat-square
-[download-url]: https://npmjs.org/package/koa-joi-router
+[npm-image]: https://img.shields.io/npm/v/logoran-joi-router.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/logoran-joi-router
+[travis-image]: https://img.shields.io/travis/logoran/joi-router.svg?style=flat-square
+[travis-url]: https://travis-ci.org/logoran/joi-router
+[codecov-image]: https://codecov.io/github/logoran/joi-router/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/logoran/joi-router?branch=master
+[david-image]: https://img.shields.io/david/logoran/joi-router.svg?style=flat-square
+[david-url]: https://david-dm.org/logoran/joi-router
+[download-image]: https://img.shields.io/npm/dm/logoran-joi-router.svg?style=flat-square
+[download-url]: https://npmjs.org/package/logoran-joi-router
 [co]: https://github.com/tj/co
-[koa]: http://koajs.com
+[logoran]: http://logoran.com
 [co-body]: https://github.com/visionmedia/co-body
 [await-busboy]: https://github.com/aheckmann/await-busboy
 [joi]: https://github.com/hapijs/joi
-[koa-router]: https://github.com/alexmingoia/koa-router
+[logoran-router]: https://github.com/logoran/router
 [generate API documentation]: https://github.com/a-s-o/koa-docs
 [path-to-regexp]: https://github.com/pillarjs/path-to-regexp
 
@@ -32,7 +32,7 @@ Easy, rich and fully validated [koa][] routing.
 - built in input validation using [joi][]
 - built in [output validation](#validating-output) using [joi][]
 - built in body parsing using [co-body][] and [await-busboy][]
-- built on the great [koa-router][]
+- built on the great [logoran-router][]
 - [exposed route definitions](#routes) for later analysis
 - string path support
 - [regexp-like path support](#path-regexps)
@@ -51,8 +51,8 @@ NodeJS `>= 7.6` is required.
 #### Example
 
 ```js
-const koa = require('koa');
-const router = require('koa-joi-router');
+const logoran = require('logoran');
+const router = require('logoran-joi-router');
 const Joi = router.Joi;
 
 const public = router();
@@ -88,18 +88,18 @@ public.route({
   }
 });
 
-const app = new koa();
+const app = new logoran();
 app.use(public.middleware());
 app.listen(3000);
 ```
 
 ## Usage
-`koa-joi-router` returns a constructor which you use to define your routes.
+`logoran-joi-router` returns a constructor which you use to define your routes.
 The design is such that you construct multiple router instances, one for
-each section of your application which you then add as koa middleware.
+each section of your application which you then add as logoran middleware.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const Joi = router.Joi;
 
 const pub = router();
@@ -111,10 +111,10 @@ pub.get('/some/path', async () => {});
 admin.get('/admin', async () => {});
 auth.post('/auth', async () => {});
 
-const app = koa();
-koa.use(pub.middleware());
-koa.use(admin.middleware());
-koa.use(auth.middleware());
+const app = logoran();
+logoran.use(pub.middleware());
+logoran.use(admin.middleware());
+logoran.use(auth.middleware());
 app.listen();
 ```
 
@@ -127,8 +127,8 @@ to avoid bugs related to passing an object created with a different
 release of Joi into the router.
 
 ```js
-const koa = require('koa');
-const router = require('koa-joi-router');
+const logoran = require('logoran');
+const router = require('logoran-joi-router');
 const Joi = router.Joi;
 ```
 
@@ -140,7 +140,7 @@ Adds a new route to the router. `route()` accepts an object or array of objects
 describing route behavior.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const public = router();
 
 public.route({
@@ -168,7 +168,7 @@ public.route({
 or
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const public = router();
 
 const routes = [
@@ -200,17 +200,17 @@ public.route(routes);
   - `failure`: HTTP response code to use when input validation fails. default `400`
   - `type`: if validating the request body, this is **required**. either `form`, `json` or `multipart`
   - `output`: see [output validation](#validating-output)
-  - `continueOnError`: if validation fails, this flags determines if `koa-joi-router` should [continue processing](#handling-errors) the middleware stack or stop and respond with an error immediately. useful when you want your route to handle the error response. default `false`
+  - `continueOnError`: if validation fails, this flags determines if `logoran-joi-router` should [continue processing](#handling-errors) the middleware stack or stop and respond with an error immediately. useful when you want your route to handle the error response. default `false`
 - `handler`: **required** async function or function
-- `meta`: meta data about this route. `koa-joi-router` ignores this but stores it along with all other route data
+- `meta`: meta data about this route. `logoran-joi-router` ignores this but stores it along with all other route data
 
 ### .get(),post(),put(),delete() etc - HTTP methods
 
-`koa-joi-router` supports the traditional `router.get()`, `router.post()` type APIs
+`logoran-joi-router` supports the traditional `router.get()`, `router.post()` type APIs
 as well.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 
 // signature: router.method(path [, config], handler [, handler])
@@ -227,7 +227,7 @@ When you need to run middleware before all routes, OR, if you just need to run
 middleware before a specific path, this method is for you.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const users = router();
 
 users.get('/something', async (ctx, next) => {
@@ -250,7 +250,7 @@ the path matches.
 To run middleware before a specific route, also pass the optional `path`:
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const users = router();
 
 users.get('/:id', handler);
@@ -262,7 +262,7 @@ users.use('/:id', runThisBeforeHandler);
 Defines a route prefix for all defined routes. This is handy in "mounting" scenarios.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const users = router();
 
 users.get('/:id', handler);
@@ -278,10 +278,10 @@ users.prefix('/user');
 
 Defines middleware for named route parameters. Useful for auto-loading or validation.
 
-_See [koa-router](https://github.com/alexmingoia/koa-router#routerparamparam-middleware--router)_
+_See [logoran-router](https://github.com/logoran/router#routerparamparam-middleware--router)_
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const users = router();
 
 const findUser = (id) => {
@@ -305,16 +305,16 @@ users.get('/users/:user', (ctx) => {
 
 ### .middleware()
 
-Generates routing middleware to be used with `koa`. If this middleware is
-never added to your `koa` application, your routes will not work.
+Generates routing middleware to be used with `logoran`. If this middleware is
+never added to your `logoran` application, your routes will not work.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const public = router();
 
 public.get('/home', homepage);
 
-const app = koa();
+const app = logoran();
 app.use(public.middleware()); // wired up
 app.listen();
 ```
@@ -323,13 +323,13 @@ app.listen();
 
 The route definition for the currently matched route is available
 via `ctx.state.route`. This object is not the exact same route
-definition object which was passed into koa-joi-router, nor is it
+definition object which was passed into logoran-joi-router, nor is it
 used internally - any changes made to this object will
 not have an affect on your running application but is available
 to meet your introspection needs.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const public = router();
 public.get('/hello', async (ctx) => {
   console.log(ctx.state.route);
@@ -338,7 +338,7 @@ public.get('/hello', async (ctx) => {
 
 ## Additions to ctx.request
 
-When using the `validate.type` option, `koa-joi-router` adds a few new properties
+When using the `validate.type` option, `logoran-joi-router` adds a few new properties
 to `ctx.request` to faciliate input validation.
 
 ### ctx.request.body
@@ -575,7 +575,7 @@ This is helpful when you'd like to introspect the previous definitions and
 take action e.g. to [generate API documentation][] etc.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 admin.post('/thing', { validate: { type: 'multipart' }}, handler);
 
@@ -593,7 +593,7 @@ Because [path-to-regexp][]
 supports it, so do we!
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 admin.get('/blog/:year(\\d{4})-:day(\\d{2})-:article(\\d{3})', async (ctx, next) => { 
  console.log(ctx.request.params) // { year: '2017', day: '01', article: '011' } 
@@ -605,7 +605,7 @@ admin.get('/blog/:year(\\d{4})-:day(\\d{2})-:article(\\d{3})', async (ctx, next)
 Defining a route for multiple HTTP methods in a single shot is supported.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 admin.route({
   path: '/',
@@ -620,7 +620,7 @@ Often times you may need to add additional, route specific middleware to a
 single route.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 admin.route({
   path: '/',
@@ -635,7 +635,7 @@ You may want to bundle and nest middleware in different ways for reuse and
 organization purposes.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 const commonMiddleware = [ yourMiddleware, someOtherMiddleware ];
 admin.route({
@@ -648,7 +648,7 @@ admin.route({
 This also works with the .get(),post(),put(),delete(), etc HTTP method helpers.
 
 ```js
-const router = require('koa-joi-router');
+const router = require('logoran-joi-router');
 const admin = router();
 const commonMiddleware = [ yourMiddleware, someOtherMiddleware ];
 admin.get('/', commonMiddleware, yourHandler);
@@ -656,7 +656,7 @@ admin.get('/', commonMiddleware, yourHandler);
 
 ## Handling errors
 
-By default, `koa-joi-router` stops processing the middleware stack when either
+By default, `logoran-joi-router` stops processing the middleware stack when either
 input validation fails. This means your route will not be reached. If
 this isn't what you want, for example, if you're writing a web app which needs
 to respond with custom html describing the errors, set the `validate.continueOnError`
@@ -700,5 +700,5 @@ admin.route({
 
 ## LICENSE
 
-[MIT](https://github.com/koajs/joi-router/blob/master/LICENSE)
+[MIT](https://github.com/logoran/joi-router/blob/master/LICENSE)
 

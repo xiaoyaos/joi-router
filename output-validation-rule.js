@@ -2,7 +2,7 @@
 
 const assert = require('assert');
 const Joi = require('joi');
-const helpMsg = ' -> see: https://github.com/koajs/joi-router/#validating-output';
+const helpMsg = ' -> see: https://github.com/logoran/joi-router/#validating-output';
 
 module.exports = OutputValidationRule;
 

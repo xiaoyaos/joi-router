@@ -1,11 +1,11 @@
 'use strict';
 
 const assert = require('assert');
-const debug = require('debug')('koa-joi-router');
+const debug = require('debug')('logoran-joi-router');
 const isGenFn = require('is-gen-fn');
 const flatten = require('flatten');
 const methods = require('methods');
-const KoaRouter = require('koa-router');
+const LogoranRouter = require('logoran-router');
 const busboy = require('await-busboy');
 const parse = require('co-body');
 const Joi = require('joi');
@@ -25,7 +25,7 @@ function Router() {
   }
 
   this.routes = [];
-  this.router = new KoaRouter();
+  this.router = new LogoranRouter();
 }
 
 /**
@@ -45,7 +45,7 @@ delegate(Router.prototype, 'router')
   .method('param');
 
 /**
- * Return koa middleware
+ * Return logoran middleware
  * @return {Function}
  * @api public
  */
@@ -381,7 +381,7 @@ async function prepareRequest(ctx, next) {
  * Validates request[prop] data with the defined validation schema.
  *
  * @param {String} prop
- * @param {koa.Request} request
+ * @param {logoran.Request} request
  * @param {Object} validate
  * @returns {Error|undefined}
  * @api private

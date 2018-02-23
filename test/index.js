@@ -4,7 +4,7 @@ require('co-mocha');
 require('co-supertest');
 
 const router = require('../');
-const Koa = require('koa');
+const Logoran = require('logoran');
 const assert = require('assert');
 const request = require('supertest');
 const http = require('http');
@@ -14,7 +14,7 @@ const slice = require('sliced');
 const MiddlewareGenerator = require('./test-utils').MiddlewareGenerator;
 
 function makeRouterApp(router) {
-  const app = new Koa();
+  const app = new Logoran();
   app.use(router.middleware());
   return app;
 }
@@ -23,7 +23,7 @@ function test(app) {
   return request(http.createServer(app.callback()));
 }
 
-describe('koa-joi-router', () => {
+describe('logoran-joi-router', () => {
   it('exposes a function', (done) => {
     assert.equal('function', typeof router);
     done();
@@ -279,7 +279,7 @@ describe('koa-joi-router', () => {
         }
       });
 
-      const app = new Koa();
+      const app = new Logoran();
       app.use(r.middleware());
       test(app).get('/a?q=6').expect(204, (err, res) => {
         if (err) console.error(res.text);
@@ -304,7 +304,7 @@ describe('koa-joi-router', () => {
         }
       });
 
-      const app = new Koa();
+      const app = new Logoran();
       app.use(r.middleware());
       test(app).get('/product/4/remove').expect(200, done);
     });
@@ -331,7 +331,7 @@ describe('koa-joi-router', () => {
               ctx.body = ctx.request.body.last + ' ' + ctx.request.body.first;
             }
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
             test(app).post('/')
             .send({
@@ -358,7 +358,7 @@ describe('koa-joi-router', () => {
               }
             });
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
@@ -387,7 +387,7 @@ describe('koa-joi-router', () => {
                 }
               });
 
-              const app = new Koa();
+              const app = new Logoran();
               app.use(r.middleware());
 
               test(app)
@@ -421,7 +421,7 @@ describe('koa-joi-router', () => {
               }
             });
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
@@ -450,7 +450,7 @@ describe('koa-joi-router', () => {
                 }
               });
 
-              const app = new Koa();
+              const app = new Logoran();
               app.use(r.middleware());
 
               test(app)
@@ -482,7 +482,7 @@ describe('koa-joi-router', () => {
               ctx.body = ctx.request.body.last + ' ' + ctx.request.body.first;
             }
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
@@ -513,7 +513,7 @@ describe('koa-joi-router', () => {
               }
             });
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
@@ -543,7 +543,7 @@ describe('koa-joi-router', () => {
                 }
               });
 
-              const app = new Koa();
+              const app = new Logoran();
               app.use(r.middleware());
 
               test(app)
@@ -574,7 +574,7 @@ describe('koa-joi-router', () => {
               }
             });
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
@@ -599,7 +599,7 @@ describe('koa-joi-router', () => {
                 }
               });
 
-              const app = new Koa();
+              const app = new Logoran();
               app.use(r.middleware());
 
               test(app)
@@ -629,7 +629,7 @@ describe('koa-joi-router', () => {
             }
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           const b = new Buffer(1024);
@@ -672,14 +672,14 @@ describe('koa-joi-router', () => {
               }
             });
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
             .put('/')
-            .attach('file1', `${__dirname}/fixtures/koa.png`)
+            .attach('file1', `${__dirname}/fixtures/logoran.png`)
             .field('color', new Buffer('green'))
-            .expect('{"color":"green","file":"koa.png"}', done);
+            .expect('{"color":"green","file":"logoran.png"}', done);
           });
         });
       });
@@ -699,7 +699,7 @@ describe('koa-joi-router', () => {
             validate: {}
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           const b = new Buffer(1024);
@@ -735,7 +735,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         it('missing querystring', (done) => {
@@ -809,7 +809,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         test(app).get('/a?d=7-27-2016&n=34&b=true')
@@ -841,7 +841,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         it('with invalid first match', (done) => {
@@ -877,7 +877,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         it('invalid quantity and invalid sku', (done) => {
@@ -944,7 +944,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         test(app).get('/request/7-27-2016/34/true')
@@ -983,7 +983,7 @@ describe('koa-joi-router', () => {
         }
       });
 
-      const app = new Koa();
+      const app = new Logoran();
       app.use(r.middleware());
 
       it('with missing header fails', (done) => {
@@ -1077,7 +1077,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         it('no posted values', (done) => {
@@ -1149,7 +1149,7 @@ describe('koa-joi-router', () => {
               }
             });
 
-            const app = new Koa();
+            const app = new Logoran();
             app.use(r.middleware());
 
             test(app)
@@ -1178,7 +1178,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         test(app).post('/').send({ hi: 'there' }).expect(400, (err) => {
@@ -1284,7 +1284,7 @@ describe('koa-joi-router', () => {
             });
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           yield test(app).post('/combo/500').expect('band-pass').expect(500).end();
@@ -1315,7 +1315,7 @@ describe('koa-joi-router', () => {
             });
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
           yield test(app).get('/all').expect('all').expect(201).end();
         });
@@ -1591,7 +1591,7 @@ describe('koa-joi-router', () => {
             }
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           it('casts output values according to Joi rules', function* () {
@@ -1623,7 +1623,7 @@ describe('koa-joi-router', () => {
             }
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           it('is not touched', function* () {
@@ -1691,7 +1691,7 @@ describe('koa-joi-router', () => {
             }
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           it('casts output values according to Joi rules', function* () {
@@ -1724,7 +1724,7 @@ describe('koa-joi-router', () => {
             }
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           it('is not touched', function* () {
@@ -1750,7 +1750,7 @@ describe('koa-joi-router', () => {
           }
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         const o = yield test(app).post('/notouch').expect(200).end();
@@ -1784,7 +1784,7 @@ describe('koa-joi-router', () => {
             }
           });
 
-          const app = new Koa();
+          const app = new Logoran();
           app.use(r.middleware());
 
           test(app).put('/').set('yum', '&&').expect(400, (err) => {
@@ -1931,7 +1931,7 @@ describe('koa-joi-router', () => {
           ctx.body = String(middlewareRanFirst);
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         yield test(app).get('/test')
@@ -1953,7 +1953,7 @@ describe('koa-joi-router', () => {
           await next();
         });
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         yield test(app).get('/test')
@@ -1980,7 +1980,7 @@ describe('koa-joi-router', () => {
         r.get('/nada', route);
         r.get('/test', route);
 
-        const app = new Koa();
+        const app = new Logoran();
         app.use(r.middleware());
 
         yield test(app).get('/test')
@@ -1998,7 +1998,7 @@ describe('koa-joi-router', () => {
 
   describe('prefix()', () => {
     it('adds routes as children of the `path`', function* () {
-      const app = new Koa();
+      const app = new Logoran();
       app.context.msg = 'fail';
 
       const r = router();
@@ -2059,7 +2059,7 @@ describe('koa-joi-router', () => {
 
   describe('param()', () => {
     it('defines middleware for named route params', function* () {
-      const app = new Koa();
+      const app = new Logoran();
       const r = router();
       const users = { '2': 'aaron' };
 
