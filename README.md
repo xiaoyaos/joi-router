@@ -392,6 +392,17 @@ data(x-www-form-urlencoded). If it is not, validation will fail and the response
 will be set to 400 or the value of `validate.failure` if specified. If successful, 
 `ctx.request.body` will be set to the parsed request input.
 
+```js
+admin.route({
+  method: 'post',
+  path: '/blog',
+  validate: { type: ['json', form'] },
+  handler: async (ctx) => {
+    console.log(ctx.request.body) // the incoming form as an object
+  }
+});
+```
+
 ### ctx.request.parts
 
 The `ctx.request.parts` property will be set when either of the following
