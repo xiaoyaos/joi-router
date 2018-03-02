@@ -198,7 +198,7 @@ public.route(routes);
   - `body`: object which conforms to [Joi][] validation
   - `maxBody`: max incoming body size for forms or json input
   - `failure`: HTTP response code to use when input validation fails. default `400`
-  - `type`: if validating the request body, this is **required**. either `form`, `json` or `multipart`
+  - `type`: if validating the request body, this is **required**. either `form`, `json`, `multipart`, `stream` or array of them
   - `output`: see [output validation](#validating-output)
   - `continueOnError`: if validation fails, this flags determines if `logoran-joi-router` should [continue processing](#handling-errors) the middleware stack or stop and respond with an error immediately. useful when you want your route to handle the error response. default `false`
 - `handler`: **required** async function or function
@@ -385,11 +385,19 @@ admin.route({
 });
 ```
 
+#### json form
+
+where `validate.type` is set to [`json`, `form`], the incoming data must be JSON or form
+data(x-www-form-urlencoded). If it is not, validation will fail and the response status 
+will be set to 400 or the value of `validate.failure` if specified. If successful, 
+`ctx.request.body` will be set to the parsed request input.
+
 ### ctx.request.parts
 
 The `ctx.request.parts` property will be set when either of the following
 `validate.type`s are set:
 
+- stream
 - multipart
 
 #### multipart
