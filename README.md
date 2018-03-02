@@ -396,7 +396,7 @@ will be set to 400 or the value of `validate.failure` if specified. If successfu
 admin.route({
   method: 'post',
   path: '/blog',
-  validate: { type: ['json', form'] },
+  validate: { type: ['json', 'form'] },
   handler: async (ctx) => {
     console.log(ctx.request.body) // the incoming form as an object
   }
