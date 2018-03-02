@@ -222,8 +222,15 @@ function checkValidators(spec) {
   }
 
   if (spec.validate.type) {
-    text = 'validate.type must be either json, form, multipart or stream';
-    assert(/json|form|multipart|stream/i.test(spec.validate.type), text);
+    if (!Array.isArray(spec.validate.type)) {
+      spec.validate.type = [spec.validate.type];
+    }
+
+    text = 'validate.type must be either json, form, multipart, stream or array of them';
+    spec.validate.type.forEach((type) => {
+      assert(typeof type === 'string', text);
+      assert(/json|form|multipart|stream/i.test(type), text);
+    });
   }
 
   if (spec.validate.output) {
@@ -251,42 +258,47 @@ function makeBodyParser(spec) {
     let opts;
 
     try {
-      switch (spec.validate.type) {
-        case 'json':
-          if (!ctx.request.is('json')) {
-            return ctx.throw(400, 'expected json');
-          }
+      if(ctx.request.is('ljson')) {
+        if (!~spec.validate.type.indexOf('ljson')) {
+          //return ctx.throw(400, 'expected ' + spec.validate.type.join() + ' but json');
+          throw('error');
+        }
+      } else if (ctx.request.is('json')) {
+        if (!~spec.validate.type.indexOf('json')) {
+          return ctx.throw(400, 'expected ' + spec.validate.type.join() + ' but json');
+        }
 
-          opts = {
-            limit: spec.validate.maxBody
-          };
+        opts = {
+          limit: spec.validate.maxBody
+        };
 
-          ctx.request.body = await parse.json(ctx, opts);
-          break;
+        ctx.request.body = await parse.json(ctx, opts);
 
-        case 'form':
-          if (!ctx.request.is('urlencoded')) {
-            return ctx.throw(400, 'expected x-www-form-urlencoded');
-          }
+      } else if (ctx.request.is('urlencoded')) {
+        if (!~spec.validate.type.indexOf('form')) {
+          return ctx.throw(400, 'expected ' + spec.validate.type.join() + ' but x-www-form-urlencoded');
+        }
 
-          opts = {
-            limit: spec.validate.maxBody
-          };
+        opts = {
+          limit: spec.validate.maxBody
+        };
 
-          ctx.request.body = await parse.form(ctx, opts);
-          break;
+        ctx.request.body = await parse.form(ctx, opts);
 
-        case 'stream':
-        case 'multipart':
-          if (!ctx.request.is('multipart/*')) {
-            return ctx.throw(400, 'expected multipart');
-          }
+      } else if (ctx.request.is('multipart/*')) {
+        if (!~spec.validate.type.indexOf('stream') && !~spec.validate.type.indexOf('multipart')) {
+          return ctx.throw(400, 'expected ' + spec.validate.type.join() + ' but multipart');
+        }
 
-          opts = spec.validate.multipartOptions || {}; // TODO document this
-          opts.autoFields = true;
+        opts = spec.validate.multipartOptions || {}; // TODO document this
+        opts.autoFields = true;
 
-          ctx.request.parts = busboy(ctx, opts);
-          break;
+        ctx.request.parts = busboy(ctx, opts);
+
+      } else {
+        if (spec.validate.type.length) {
+          return ctx.throw(400, 'expected ' + spec.validate.type.join());
+        }
       }
     } catch (err) {
       if (!spec.validate.continueOnError) return ctx.throw(err);
