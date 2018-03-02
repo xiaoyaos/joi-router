@@ -397,7 +397,7 @@ describe('logoran-joi-router', () => {
                 name: 'Pebble'
               })
               .expect(200)
-              .expect('expected json but x-www-form-urlencoded', done);
+              .expect('expected json but no match', done);
             });
           });
         });
@@ -554,7 +554,7 @@ describe('logoran-joi-router', () => {
               })
               .type('json')
               .expect(200)
-              .expect('expected form but json', done);
+              .expect('expected urlencoded but no match', done);
             });
           });
         });
@@ -605,7 +605,7 @@ describe('logoran-joi-router', () => {
               test(app)
               .post('/')
               .expect(200)
-              .expect('expected form', done);
+              .expect('expected urlencoded but no match', done);
             });
           });
         });
