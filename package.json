@@ -1,6 +1,6 @@
 {
   "name": "logoran-joi-router",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Configurable, input validated routing for logoran.",
   "main": "joi-router.js",
   "keywords": [
