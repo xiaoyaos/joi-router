@@ -5,18 +5,18 @@ const assert = require('assert');
 
 module.exports = OutputValidator;
 
-function OutputValidator(output) {
+function OutputValidator(joi, output) {
   assert.equal('object', typeof output, 'spec.validate.output must be an object');
 
-  this.rules = OutputValidator.tokenizeRules(output);
+  this.rules = OutputValidator.tokenizeRules(joi, output);
   OutputValidator.assertNoOverlappingStatusRules(this.rules);
 
   this.output = output;
 }
 
-OutputValidator.tokenizeRules = function tokenizeRules(output) {
+OutputValidator.tokenizeRules = function tokenizeRules(joi, output) {
   function createRule(status) {
-    return new OutputValidationRule(status, output[status]);
+    return new OutputValidationRule(joi, status, output[status]);
   }
   return Object.keys(output).map(createRule);
 };
@@ -39,13 +39,13 @@ function assertNoOverlappingStatusRules(rules) {
   }
 };
 
-OutputValidator.prototype.validate = function(ctx) {
+OutputValidator.prototype.validate = function(ctx, locale) {
   assert(ctx, 'missing request context!');
 
   for (let i = 0; i < this.rules.length; ++i) {
     const rule = this.rules[i];
     if (rule.matches(ctx)) {
-      return rule.validateOutput(ctx);
+      return rule.validateOutput(ctx, locale);
     }
   }
 };

@@ -1,18 +1,18 @@
 'use strict';
 
 const assert = require('assert');
-const Joi = require('joi');
 const helpMsg = ' -> see: https://github.com/logoran/joi-router/#validating-output';
 
 module.exports = OutputValidationRule;
 
-function OutputValidationRule(status, spec) {
+function OutputValidationRule(joi, status, spec) {
   assert(status, 'OutputValidationRule: missing status param');
   assert(spec, 'OutputValidationRule: missing spec param');
 
   this.ranges = status.split(',').map(trim).filter(Boolean).map(rangify);
   assert(this.ranges.length > 0, 'invalid status code: ' + status + helpMsg);
 
+  this.joi = joi;
   this.status = status;
   this.spec = spec;
   this.validateSpec();
@@ -66,18 +66,18 @@ OutputValidationRule.prototype.matches = function matches(ctx) {
  * Validates this rule against the given `ctx`.
  */
 
-OutputValidationRule.prototype.validateOutput = function validateOutput(ctx) {
+OutputValidationRule.prototype.validateOutput = function validateOutput(ctx, locale) {
   let result;
 
   if (this.spec.headers) {
-    result = Joi.validate(ctx.response.headers, this.spec.headers);
+    result = this.joi.validate(ctx.response.headers, this.spec.headers, {i18n: locale});
     if (result.error) return result.error;
     // use casted values
     ctx.set(result.value);
   }
 
   if (this.spec.body) {
-    result = Joi.validate(ctx.body, this.spec.body);
+    result = this.joi.validate(ctx.body, this.spec.body, {i18n: locale});
     if (result.error) return result.error;
     // use casted values
     ctx.body = result.value;

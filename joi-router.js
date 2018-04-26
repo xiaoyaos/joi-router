@@ -8,10 +8,12 @@ const methods = require('methods');
 const LogoranRouter = require('logoran-router');
 const busboy = require('await-busboy');
 const parse = require('co-body');
-const Joi = require('joi');
+const Joi = require('@logoran/joi');
+const i18n = require('joi-x-i18n');
 const slice = require('sliced');
 const delegate = require('delegates');
 const clone = require('clone');
+const hoek = require('hoek');
 const OutputValidator = require('./output-validator');
 
 const validateType = {
@@ -26,10 +28,43 @@ module.exports = Router;
 // expose Joi for use in applications
 Router.Joi = Joi;
 
-function Router() {
+function Router(extensions, directory, defaultLocale, suffix, cookie, queryParameter, ignoreOutValid) {
   if (!(this instanceof Router)) {
-    return new Router();
+    return new Router(extensions, directory, defaultLocale, suffix, cookie, queryParameter, ignoreOutValid);
   }
+
+  if (extensions && !extensions instanceof Array) {
+    const options = extensions;
+    this.joiOptions = {
+      cookie: extensions.cookie,
+      queryParameter: extensions.queryParameter,
+      ignoreOutValid: extensions.ignoreOutValid
+    }
+    directory =  options.directory;
+    defaultLocale = options.defaultLocale;
+    suffix = options.suffix;
+    extensions = options.extensions;
+  } else {
+    this.joiOptions = {
+      cookie: cookie,
+      queryParameter: queryParameter,
+      ignoreOutValid: ignoreOutValid
+    }
+  }
+
+  extensions = extensions || [];
+  extensions = hoek.unique(extensions.concat('joi-date-extensions', 'joi-enum-extensions'));
+  const modules = [];
+  extensions.forEach( name => {
+    try {
+      modules.push(require(name));
+    } catch (e) {
+      console.warn('Load joi extensions ', name, ' error');
+    }
+  });
+
+  const joi = Joi.extend(modules);
+  this.Joi = this.joiOptions.joi = i18n(joi, directory, defaultLocale, suffix);
 
   this.routes = [];
   this.router = new LogoranRouter();
@@ -123,7 +158,7 @@ Router.prototype._addRoute = function addRoute(spec) {
 
   const bodyParser = makeBodyParser(spec);
   const specExposer = makeSpecExposer(spec);
-  const validator = makeValidator(spec);
+  const validator = makeValidator(spec, this.joiOptions);
   const handlers = flatten(spec.handler);
 
   const args = [
@@ -156,7 +191,7 @@ Router.prototype._validateRouteSpec = function validateRouteSpec(spec) {
 
   checkHandler(spec);
   checkMethods(spec);
-  checkValidators(spec);
+  checkValidators(this.joiOptions.joi, spec, this.joiOptions.ignoreOutValid);
 };
 
 /**
@@ -219,7 +254,7 @@ function checkMethods(spec) {
  * @api private
  */
 
-function checkValidators(spec) {
+function checkValidators(joi, spec, ignoreOutValid) {
   if (!spec.validate) return;
 
   let text;
@@ -242,8 +277,9 @@ function checkValidators(spec) {
     });
   }
 
-  if (spec.validate.output) {
-    spec.validate._outputValidator = new OutputValidator(spec.validate.output);
+  if (spec.validate.output && !ignoreOutValid && !spec.validate.output.ignore) {
+    delete spec.validate.output.ignore;
+    spec.validate._outputValidator = new OutputValidator(joi, spec.validate.output);
   }
 
   // default HTTP status code for failures
@@ -315,6 +351,14 @@ function captureError(ctx, type, err) {
 }
 
 /**
+ * @api private
+ */
+
+function getUserLocale(ctx, cookie, queryParameter) {
+  return (cookie && ctx.cookies.get(cookie)) || (queryParameter && ctx.query[queryParameter]);
+}
+
+/**
  * Creates validator middleware.
  *
  * @param {Object} spec
@@ -322,7 +366,7 @@ function captureError(ctx, type, err) {
  * @api private
  */
 
-function makeValidator(spec) {
+function makeValidator(spec, options) {
   const props = 'header query params body'.split(' ');
 
   return async function validator(ctx, next) {
@@ -330,11 +374,13 @@ function makeValidator(spec) {
 
     let err;
 
+    const locale = getUserLocale(ctx, options.cookie, options.queryParameter);
+
     for (let i = 0; i < props.length; ++i) {
       const prop = props[i];
 
       if (spec.validate[prop]) {
-        err = validateInput(prop, ctx, spec.validate);
+        err = validateInput(prop, ctx, spec.validate, options.joi, locale);
 
         if (err) {
           if (!spec.validate.continueOnError) return ctx.throw(err);
@@ -348,7 +394,7 @@ function makeValidator(spec) {
     if (spec.validate._outputValidator) {
       debug('validating output');
 
-      err = spec.validate._outputValidator.validate(ctx);
+      err = spec.validate._outputValidator.validate(ctx, locale);
       if (err) {
         err.status = 500;
         return ctx.throw(err);
@@ -393,11 +439,11 @@ async function prepareRequest(ctx, next) {
  * @api private
  */
 
-function validateInput(prop, ctx, validate) {
+function validateInput(prop, ctx, validate, joi, locale) {
   debug('validating %s', prop);
 
   const request = ctx.request;
-  const res = Joi.validate(request[prop], validate[prop]);
+  const res = joi.validate(request[prop], validate[prop], {i18n: locale});
 
   if (res.error) {
     res.error.status = validate.failure;
