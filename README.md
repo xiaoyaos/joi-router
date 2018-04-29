@@ -26,6 +26,7 @@ Easy, rich and fully validated [logoran][] routing.
 [logoran-router]: https://github.com/logoran/router
 [generate API documentation]: https://github.com/a-s-o/koa-docs
 [path-to-regexp]: https://github.com/pillarjs/path-to-regexp
+[joi-x-i18n]: https://github.com/logoran/joi-x-i18n
 
 #### Features:
 
@@ -33,11 +34,16 @@ Easy, rich and fully validated [logoran][] routing.
 - built in [output validation](#validating-output) using [joi][]
 - built in body parsing using [co-body][] and [await-busboy][]
 - built on the great [logoran-router][]
+- [Module options support](#module-options)
+- [internationalization supoort](#internationalization-support)
 - [exposed route definitions](#routes) for later analysis
 - string path support
 - [regexp-like path support](#path-regexps)
 - [multiple method support](#multiple-methods-support)
 - [multiple middleware support](#multiple-middleware-support)
+- [xml type support](#xml)
+- [multiple types support](#multiple-types-support)
+- [ignore output validate support](#ignore-output-validate-support)
 - [continue on error support](#handling-errors)
 - [router prefixing support](#prefix)
 - [router level middleware support](#use)
@@ -118,6 +124,49 @@ logoran.use(auth.middleware());
 app.listen();
 ```
 
+## Module options
+
+### extensions
+joi extensions for validate, 'joi-date-extensions', 'joi-enum-extensions' is used for default.
+
+### directory
+joi i18n locate support directory.
+
+### defaultLocale
+default locate for i18n support. default use locale in env.
+
+### suffix
+i18n language file suffix in directory. default ['js', 'json'].
+
+### cookie
+user i18n indicate in cookie name.
+
+### queryParameter
+user i18n indicate in query parameter.
+
+### igonreOutValid
+ignore output joi validate option.
+
+```js
+const router = require('logoran-joi-router');
+const public = router(['joi-extension-name'], 'i18n-locale-dir', 'zh_CN', ['json'], 'i18n-cookie-name', 'i18n-query-parameter', true);
+```
+
+or
+
+```js
+const router = require('logoran-joi-router');
+const public = router({[
+  extensions: 'joi-extension-name'],
+  directory: 'i18n-locale-dir',
+  defaultLocale: 'zh_CN',
+  suffix: ['json'],
+  cookie: 'i18n-cookie-name',
+  queryParameter: 'i18n-query-parameter',
+  igonreOutValid: true
+});
+```
+
 ## Module properties
 
 ### .Joi
@@ -130,6 +179,21 @@ release of Joi into the router.
 const logoran = require('logoran');
 const router = require('logoran-joi-router');
 const Joi = router.Joi;
+```
+
+## internationalization support
+
+use [joi-x-i18n][] for internationalization support, default support de_DE en_US es_ES fr_FR pt_BR ru_RU tr_TR and zh_CN language, and support use defined locate and language in module options.
+
+```js
+const router = require('logoran-joi-router');
+const public = router({[
+  directory: 'local-dir-i18n',
+  defaultLocale: 'zh_CN',
+  suffix: ['json'],
+  cookie: 'i18n-cookie-name',
+  queryParameter: 'i18n-query-parameter'
+});
 ```
 
 ## Router instance methods
@@ -197,6 +261,8 @@ public.route(routes);
   - `params`: object which conforms to [Joi][] validation
   - `body`: object which conforms to [Joi][] validation
   - `maxBody`: max incoming body size for forms or json or xml input
+  - `xmlRoot`: body xml format get the root name or ignore, only effective xml format incoming body, default false
+  - `xmlArray`: xml format always set sub as array or not, or explicit list the node name which is array no matter single or multiple sub node it has, only effective xml format incoming body. default false
   - `failure`: HTTP response code to use when input validation fails. default `400`
   - `type`: if validating the request body, this is **required**. either `form`, `json`, `xml`, `multipart`, `stream` or array of them
   - `output`: see [output validation](#validating-output)
@@ -666,6 +732,48 @@ admin.route({
   handler: [ yourMiddleware, yourHandler ]
 });
 ```
+
+## Multiple types support
+
+Defining a route for multiple incoming type in validate is supported.
+
+```js
+const router = require('logoran-joi-router');
+const admin = router();
+admin.route({
+  path: '/',
+  method: ['POST', 'PUT'],
+  handler: [ yourMiddleware, yourHandler ]
+  validate: {
+    type: ['form', 'json', 'xml'],
+    body: joi
+  }
+});
+```
+
+## ignore output validate support
+
+Defining a route for multiple incoming type in validate is supported.
+
+```js
+const router = require('logoran-joi-router');
+const admin = router();
+admin.route({
+  path: '/',
+  method: ['POST', 'PUT'],
+  handler: [ yourMiddleware, yourHandler ]
+  validate: {
+    type: ['form', 'json', 'xml'],
+    body: joi,
+    output: {
+      ignore: true
+    }
+  }
+});
+```
+
+
+- [ignore output validate support](#ignore-output-validate-support)
 
 ## Nested middleware support
 
