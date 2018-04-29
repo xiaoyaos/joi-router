@@ -262,6 +262,10 @@ function checkValidators(joi, spec, ignoreOutValid) {
   if (spec.validate.body) {
     text = 'validate.type must be declared when using validate.body';
     assert(/json|form|xml/.test(spec.validate.type), text);
+    if (spec.validate.type === 'xml') {
+      spec.validate.xmlArray = spec.validate.xmlArray || false;
+      spec.validate.xmlRoot = spec.validate.xmlRoot || false;
+    }
   }
 
   let type = spec.validate.type;
@@ -324,7 +328,8 @@ function makeBodyParser(spec) {
         case 'xml':
           opts = {
             limit: spec.validate.maxBody,
-            explicitRoot: false
+            explicitArray: spec.validate.xmlArray,
+            explicitRoot: spec.validate.xmlRoot
           };
 
           ctx.request.body = await parse.xml(ctx, opts);
