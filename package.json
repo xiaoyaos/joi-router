@@ -33,10 +33,10 @@
   },
   "homepage": "https://github.com/logoran/joi-router",
   "dependencies": {
+    "@logoran/co-body": "^5.1.1",
     "@logoran/joi": "^13.2.0",
     "await-busboy": "1.0.1",
     "clone": "2.1.1",
-    "co-body": "5.1.1",
     "debug": "2.6.9",
     "delegates": "1.0.0",
     "flatten": "1.0.2",

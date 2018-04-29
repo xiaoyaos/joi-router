@@ -7,7 +7,7 @@ const flatten = require('flatten');
 const methods = require('methods');
 const LogoranRouter = require('logoran-router');
 const busboy = require('await-busboy');
-const parse = require('co-body');
+const parse = require('@logoran/co-body');
 const Joi = require('@logoran/joi');
 const i18n = require('joi-x-i18n');
 const slice = require('sliced');
@@ -19,6 +19,7 @@ const OutputValidator = require('./output-validator');
 const validateType = {
   json: 'json',
   form: 'urlencoded',
+  xml: 'xml',
   multipart: 'multipart/*',
   stream: 'multipart/*'
 }
@@ -112,10 +113,10 @@ Router.prototype.middleware = function middleware() {
  *       header: Joi object
  *       params: Joi object (:id)
  *       query: Joi object (validate key/val pairs in the querystring)
- *       body: Joi object (the request payload body) (json or form)
+ *       body: Joi object (the request payload body) (json or form or xml)
  *       maxBody: '64kb' // (json, x-www-form-urlencoded only - not stream size)
  *                       // optional
- *       type: 'json|form|multipart' (required when body is specified)
+ *       type: 'json|form|multipart|xml' (required when body is specified)
  *       failure: 400 // http error code to use
  *     },
  *     meta: { // this is ignored but useful for doc generators etc
@@ -260,7 +261,7 @@ function checkValidators(joi, spec, ignoreOutValid) {
   let text;
   if (spec.validate.body) {
     text = 'validate.type must be declared when using validate.body';
-    assert(/json|form/.test(spec.validate.type), text);
+    assert(/json|form|xml/.test(spec.validate.type), text);
   }
 
   let type = spec.validate.type;
@@ -269,10 +270,10 @@ function checkValidators(joi, spec, ignoreOutValid) {
       spec.validate.type = type = [spec.validate.type];
     }
 
-    text = 'validate.type must be either json, form, multipart, stream or array of them';
+    text = 'validate.type must be either json, form, xml, multipart, stream or array of them';
     type.forEach((t, i) => {
       assert(typeof t === 'string', text);
-      assert(/json|form|multipart|stream/i.test(t), text);
+      assert(/json|form|xml|multipart|stream/i.test(t), text);
       type[i] = validateType[t];
     });
   }
@@ -318,6 +319,15 @@ function makeBodyParser(spec) {
           };
 
           ctx.request.body = await parse.form(ctx, opts);
+          break;
+
+        case 'xml':
+          opts = {
+            limit: spec.validate.maxBody,
+            explicitRoot: false
+          };
+
+          ctx.request.body = await parse.xml(ctx, opts);
           break;
 
         case 'multipart/form-data':

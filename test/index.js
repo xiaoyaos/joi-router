@@ -611,6 +611,155 @@ describe('logoran-joi-router', () => {
         });
       });
 
+      describe('xml', () => {
+        describe('and valid xml is sent', () => {
+          it('is parsed as xml', (done) => {
+            const r = router();
+
+            r.route({
+              method: 'post',
+              path: '/',
+              handler: fn,
+              validate: {
+                type: 'xml'
+              }
+            });
+
+            function fn(ctx) {
+              ctx.body = ctx.request.body.last + ' ' + ctx.request.body.first;
+            }
+
+            const app = new Logoran();
+            app.use(r.middleware());
+            test(app).post('/')
+            .type('xml')
+            .send('<root><last>Heckmann</last><first>Aaron</first></root>')
+            .expect(200)
+            .expect('Heckmann Aaron', done);
+          });
+        });
+
+        describe('and non-xml is sent', () => {
+          it('fails', (done) => {
+            const r = router();
+
+            r.route({
+              method: 'post',
+              path: '/',
+              handler: function(ctx) {
+                ctx.status = 204;
+              },
+              validate: {
+                type: 'xml'
+              }
+            });
+
+            const app = new Logoran();
+            app.use(r.middleware());
+
+            test(app)
+            .post('/')
+            .type('form')
+            .send({
+              name: 'Pebble'
+            })
+            .expect(400, done);
+          });
+
+          describe('and validate.continueOnError is true', () => {
+            it('runs the route and sets ctx.invalid', (done) => {
+              const r = router();
+
+              r.route({
+                method: 'post',
+                path: '/',
+                validate: {
+                  type: 'xml',
+                  continueOnError: true
+                },
+                handler: (ctx) => {
+                  ctx.status = 200;
+                  ctx.body = ctx.invalid.type.msg;
+                }
+              });
+
+              const app = new Logoran();
+              app.use(r.middleware());
+
+              test(app)
+              .post('/')
+              .type('form')
+              .send({
+                name: 'Pebble'
+              })
+              .expect(200)
+              .expect('expected xml but no match', done);
+            });
+          });
+        });
+
+        describe('and invalid xml is sent', () => {
+          const invalid = '{' + JSON.stringify({
+            name: 'Pebble'
+          });
+
+          it('fails', (done) => {
+            const r = router();
+
+            r.route({
+              method: 'post',
+              path: '/',
+              handler: (ctx) => {
+                ctx.status = 204;
+              },
+              validate: {
+                type: 'xml'
+              }
+            });
+
+            const app = new Logoran();
+            app.use(r.middleware());
+
+            test(app)
+            .post('/')
+            .type('xml')
+            .send(invalid)
+            .expect(400, done);
+          });
+
+          describe('and validate.continueOnError is true', () => {
+            it('runs the route and sets ctx.invalid', (done) => {
+              const r = router();
+
+              r.route({
+                method: 'post',
+                path: '/',
+                validate: {
+                  type: 'xml',
+                  continueOnError: true
+                },
+                handler: (ctx) => {
+                  ctx.status = 200;
+                  ctx.body = ctx.invalid &&
+                    ctx.invalid.type &&
+                    ctx.invalid.type.msg;
+                }
+              });
+
+              const app = new Logoran();
+              app.use(r.middleware());
+
+              test(app)
+              .post('/')
+              .type('xml')
+              .send(invalid)
+              .expect(200)
+              .expect(/^Non-whitespace before/, done);
+            });
+          });
+        });
+      });
+
       describe('multipart', () => {
         it('is undefined', (done) => {
           const r = router();
@@ -1009,6 +1158,7 @@ describe('logoran-joi-router', () => {
           const tests = {
             json: 1,
             form: 1,
+            xml: 1,
             stream: 0
           };
 
