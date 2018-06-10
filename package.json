@@ -1,6 +1,6 @@
 {
   "name": "logoran-joi-router",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "Configurable, input validated routing for logoran.",
   "main": "joi-router.js",
   "keywords": [
@@ -45,7 +45,7 @@
     "joi-date-extensions": "^1.2.0",
     "joi-enum-extensions": "^1.0.3",
     "joi-x-i18n": "^1.0.1",
-    "logoran-router": "^1.0.3",
+    "logoran-router": "^1.0.4",
     "methods": "1.1.2",
     "sliced": "1.0.1"
   },
