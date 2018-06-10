@@ -2241,4 +2241,42 @@ describe('logoran-joi-router', () => {
     });
 
   });
+
+  describe('follow()', () => {
+    it('defines follow middleware factory for route', function* () {
+      const app = new Logoran();
+      const r = router();
+      const users = { '2': 'aaron' };
+
+      r.follow((matched) => {
+        assert.equal(matched.path, '/user/:user');
+        return async (ctx, next) => {
+          ctx.user = await Promise.resolve(users[ctx.params.user]);
+
+          if (!ctx.user) {
+            ctx.status = 404;
+            return;
+          }
+
+          await next();
+        };
+      });
+
+      r.get('/user/:user', (ctx) => {
+        ctx.body = `hello ${ctx.user}`;
+      });
+
+      app.use(r.middleware());
+
+      yield test(app).get('/user/1')
+        .expect(404)
+        .end();
+
+      yield test(app).get('/user/2')
+        .expect('hello aaron')
+        .expect(200)
+        .end();
+    });
+
+  });
 });

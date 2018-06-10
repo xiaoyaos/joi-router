@@ -85,7 +85,8 @@ function Router(extensions, directory, defaultLocale, suffix, cookie, queryParam
 delegate(Router.prototype, 'router')
   .method('prefix')
   .method('use')
-  .method('param');
+  .method('param')
+  .method('follow');
 
 /**
  * Return logoran middleware

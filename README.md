@@ -369,6 +369,38 @@ users.get('/users/:user', (ctx) => {
 // GET /users/3 -> 'Hello Cheddar'
 ```
 
+### .follow()
+
+Defines middleware factory for follow matched route. Useful for auto-loading or validation.
+
+_See [logoran-router](https://github.com/logoran/router#routerparamparam-middleware--router)_
+
+```js
+const router = require('logoran-joi-router');
+const users = router();
+
+const findUser = (id) => {
+  // stub
+  return Promise.resolve('Cheddar');
+};
+
+users.follow( (matched) => {
+  // matched.path === '/users/:user'
+  return async (ctx, next) => {
+    const user = await findUser(ctx.params.user);
+    if (!user) return ctx.status = 404;
+    ctx.user = user;
+    await next();
+  };
+});
+
+users.get('/users/:user', (ctx) => {
+  ctx.body = `Hello ${ctx.user}`;
+});
+
+// GET /users/3 -> 'Hello Cheddar'
+```
+
 ### .middleware()
 
 Generates routing middleware to be used with `logoran`. If this middleware is
