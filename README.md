@@ -386,12 +386,22 @@ const findUser = (id) => {
 
 users.follow( (matched) => {
   // matched.path === '/users/:user'
+  // matched.path is the full path of url
+  // matched.metheds is the allowed http methods
+  // matched.name is the name of the request
+  // matched.stack is the all middlewares
   return async (ctx, next) => {
     const user = await findUser(ctx.params.user);
     if (!user) return ctx.status = 404;
     ctx.user = user;
     await next();
   };
+  // or return middleware and position.
+  // return [(ctx, next) => {
+  //   ctx.user = users[ctx.params.user];
+  //   if (!ctx.user) return ctx.status = 404;
+  //   return next();
+  // }, 0];
 });
 
 users.get('/users/:user', (ctx) => {
