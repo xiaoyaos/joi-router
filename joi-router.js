@@ -131,8 +131,11 @@ Router.prototype.middleware = function middleware() {
  * @return {Router} self
  * @api public
  */
-
+ Router.prototype.getRouterList = function(){
+   return this.router.routerLists;
+ }
 Router.prototype.route = function route(spec) {
+  this.router.routerList.push(spec);
   if (Array.isArray(spec)) {
     for (let i = 0; i < spec.length; i++) {
       this._addRoute(spec[i]);
